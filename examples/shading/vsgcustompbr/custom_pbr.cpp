@@ -24,6 +24,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <vsg/state/material.h>
 #include <vsg/utils/ShaderSet.h>
 
+namespace vsg
+{
+    struct MaterialFx
+    {
+        vsg::vec4 overlayColor{0.0f, 0.0f, 0.0f, 0.0f};
+    };
+
+    template<>
+    constexpr bool has_read_write<MaterialFx>()
+    {
+        return false;
+    }
+
+    VSG_value(MaterialFxValue, MaterialFx);
+    VSG_array(MaterialFxArray, MaterialFx);
+} // namespace vsg
+
 vsg::ref_ptr<vsg::ShaderSet> pbr_custom_ShaderSet(vsg::ref_ptr<const vsg::Options> options)
 {
     vsg::info("Local pbr_custom_ShaderSet(",options,")");
@@ -54,6 +71,7 @@ vsg::ref_ptr<vsg::ShaderSet> pbr_custom_ShaderSet(vsg::ref_ptr<const vsg::Option
     shaderSet->addUniformBinding("aoMap", "VSG_LIGHTMAP_MAP", 0, 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, vsg::vec4Array2D::create(1, 1));
     shaderSet->addUniformBinding("emissiveMap", "VSG_EMISSIVE_MAP", 0, 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, vsg::vec4Array2D::create(1, 1));
     shaderSet->addUniformBinding("specularMap", "VSG_SPECULAR_MAP", 0, 5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, vsg::vec4Array2D::create(1, 1));
+    shaderSet->addUniformBinding("mat_fx", "", 0, 9, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, vsg::MaterialFxValue::create());
     shaderSet->addUniformBinding("material", "", 0, 10, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, vsg::PbrMaterialValue::create());
     shaderSet->addUniformBinding("lightData", "", 1, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, vsg::vec4Array::create(64));
 
