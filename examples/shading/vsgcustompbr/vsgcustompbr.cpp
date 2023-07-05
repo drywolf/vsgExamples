@@ -5,9 +5,24 @@
 #endif
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <iostream>
 #include <thread>
+
+#include <custom_pbr.cpp>
+
+// we use this function instead of vsg::createPhysicsBasedRenderingShaderSet(options)
+vsg::ref_ptr<vsg::ShaderSet> create_custom_pbr_ShaderSet(vsg::ref_ptr<const vsg::Options> options)
+{
+    if (options)
+    {
+        // check if a ShaderSet has already been assigned to the options object, if so return it
+        if (auto itr = options->shaderSets.find("pbr"); itr != options->shaderSets.end()) return itr->second;
+    }
+
+    return pbr_custom_ShaderSet(options);
+}
 
 vsg::ref_ptr<vsg::Node> createTextureQuad(vsg::ref_ptr<vsg::Data> sourceData, vsg::ref_ptr<vsg::Options> options)
 {
@@ -39,7 +54,7 @@ void enableGenerateDebugInfo(vsg::ref_ptr<vsg::Options> options)
     auto& phong = options->shaderSets["phong"] = vsg::createPhongShaderSet(options);
     phong->defaultShaderHints = shaderHints;
 
-    auto& pbr = options->shaderSets["pbr"] = vsg::createPhysicsBasedRenderingShaderSet(options);
+    auto& pbr = options->shaderSets["pbr"] = create_custom_pbr_ShaderSet(options);
     pbr->defaultShaderHints = shaderHints;
 }
 
@@ -56,16 +71,29 @@ int main(int argc, char** argv)
         options->fileCache = vsg::getEnv("VSG_FILE_CACHE");
         options->paths = vsg::getEnvPaths("VSG_FILE_PATH");
 
+        // this is necessary to load the standard_pbr_custom.frag file & fbx-test.fbx model
+        options->paths.push_back(CMAKE_SOURCE_DIR + "/data");
+
 #ifdef vsgXchange_all
         // add vsgXchange's support for reading and writing 3rd party file formats
         options->add(vsgXchange::all::create());
 #endif
 
+        // create an instance of the custom_pbr shader-set
+        auto custom_pbr_shaderSet = pbr_custom_ShaderSet(options);
+        assert(custom_pbr_shaderSet != nullptr);
+
+        // assign the custom_pbr shader-set to vsg::Options, so the custom shader-set will be used by vsgXchange when it starts handling the scene materials
+        options->shaderSets["pbr"] = custom_pbr_shaderSet;
+
         arguments.read(options);
 
         auto windowTraits = vsg::WindowTraits::create();
-        windowTraits->windowTitle = "vsgviewer";
-        windowTraits->debugLayer = arguments.read({"--debug", "-d"});
+        windowTraits->windowTitle = "vsgcustompbr";
+
+        // always enable VK validation-layers, until we know that this example will work without errors!
+        windowTraits->debugLayer = true;
+
         windowTraits->apiDumpLayer = arguments.read({"--api", "-a"});
         windowTraits->synchronizationLayer = arguments.read("--sync");
         bool reportAverageFrameRate = arguments.read("--fps");
