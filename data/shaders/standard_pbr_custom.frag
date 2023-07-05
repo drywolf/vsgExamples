@@ -32,6 +32,11 @@ layout(binding = 4) uniform sampler2D emissiveMap;
 layout(binding = 5) uniform sampler2D specularMap;
 #endif
 
+layout(binding = 9) uniform MatFxData
+{
+    vec4 overlayColor;
+} mat_fx;
+
 layout(binding = 10) uniform PbrData
 {
     vec4 baseColorFactor;
@@ -464,4 +469,7 @@ void main()
     }
 
     outColor = LINEARtoSRGB(vec4(color, baseColor.a));
+
+    // just perform a simple additive blending of the overlayColor on top of the PBR result
+    outColor.rgb += mat_fx.overlayColor.rgb;
 }
