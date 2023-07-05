@@ -24,16 +24,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <vsg/state/material.h>
 #include <vsg/utils/ShaderSet.h>
 
-vsg::ref_ptr<vsg::ShaderSet> pbr_ShaderSet(vsg::ref_ptr<const vsg::Options> options)
+vsg::ref_ptr<vsg::ShaderSet> pbr_custom_ShaderSet(vsg::ref_ptr<const vsg::Options> options)
 {
-    vsg::info("Local pbr_ShaderSet(",options,")");
+    vsg::info("Local pbr_custom_ShaderSet(",options,")");
 
     auto vertexShader = vsg::read_cast<vsg::ShaderStage>("shaders/standard.vert", options);
-    auto fragmentShader = vsg::read_cast<vsg::ShaderStage>("shaders/standard_pbr.frag", options);
+    auto fragmentShader = vsg::read_cast<vsg::ShaderStage>("shaders/standard_pbr_custom.frag", options);
 
     if (!vertexShader || !fragmentShader)
     {
-        vsg::error("pbr_ShaderSet(...) could not find shaders.");
+        vsg::error("pbr_custom_ShaderSet(...) could not find shaders.");
         return {};
     }
 
