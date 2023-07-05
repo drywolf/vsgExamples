@@ -1,6 +1,10 @@
 set(SOURCES
     vsgcustompbr.cpp
+    custom_pbr.cpp
 )
+
+# do not compile the custom_pbr.cpp file, just include it in the IDEs for easier navigation
+set_source_files_properties(custom_pbr.cpp PROPERTIES HEADER_FILE_ONLY TRUE)
 
 add_executable(vsgcustompbr ${SOURCES})
 
